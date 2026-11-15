@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Orb } from "@/components/Orb";
+import { Backdrop } from "@/components/Backdrop";
 import { resolveEventId } from "@/lib/demo";
 import type { EventState, GuestWithCharge } from "@/lib/types";
 
@@ -111,7 +111,7 @@ function PuertaInner() {
 
   return (
     <div className="door">
-      <Orb mode="door" phase={phase} pulseKey={pulseKey} />
+      <Backdrop mode="door" phase={phase} pulseKey={pulseKey} />
       <div className="door-frame">
         <p className="kicker">
           Umbral{state?.event.is_demo ? " · demo" : ""}
