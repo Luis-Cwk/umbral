@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FieldPanel } from "@/components/FieldPanel";
+import { Backdrop } from "@/components/Backdrop";
 
 export default function Home() {
   return (
@@ -7,6 +7,7 @@ export default function Home() {
       <a className="skip" href="#contenido">
         Saltar al contenido
       </a>
+      <Backdrop />
       <main id="contenido" className="landing">
         <section className="landing-copy">
           <div className="landing-hero">
@@ -16,9 +17,6 @@ export default function Home() {
               Taquilla con cobros CoDi. La puerta abre con el webhook firmado.
             </p>
             <div className="actions">
-              <Link className="btn" href="/demo">
-                Ver demo
-              </Link>
               <Link
                 className="btn"
                 href="/taquilla/00000000-0000-0000-0000-000000000001"
@@ -59,8 +57,6 @@ export default function Home() {
             <footer>Umbral / CDMX 2026</footer>
           </blockquote>
         </section>
-
-        <FieldPanel />
       </main>
     </>
   );

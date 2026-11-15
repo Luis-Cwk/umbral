@@ -3,21 +3,53 @@
 import { useEffect, useRef } from "react";
 
 export type TypographicFieldProps = {
-  mode?: "landing" | "door" | "header" | "panel";
+  mode?: "landing" | "door" | "header";
   phase?: "closed" | "paid" | "inside" | "review";
   pulseKey?: number | string;
   animate?: boolean;
 };
 
-const RAMP =
-  " .'`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+const RAMP = " .:-=+*#%@";
+const CHARS = RAMP.slice(1);
 
-const MODES = {
-  landing: { cell: 12, cx: 0.68, cy: 0.4, radius: 0.5 },
-  door: { cell: 14, cx: 0.5, cy: 0.5, radius: 0.55 },
-  header: { cell: 6, cx: 0.5, cy: 0.5, radius: 0.7 },
-  panel: { cell: 11, cx: 0.5, cy: 0.5, radius: 0.58 },
+const CONFIG = {
+  landing: {
+    count: 220,
+    speed: 1,
+    opacity: 0.8,
+    size: 11,
+    tx: 0.68,
+    ty: 0.45,
+    amp: 0.16,
+  },
+  door: {
+    count: 180,
+    speed: 0.8,
+    opacity: 0.55,
+    size: 13,
+    tx: 0.5,
+    ty: 0.5,
+    amp: 0.18,
+  },
+  header: {
+    count: 40,
+    speed: 0.6,
+    opacity: 0.6,
+    size: 7,
+    tx: 0.5,
+    ty: 0.5,
+    amp: 0.1,
+  },
 } as const;
+
+type Particle = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  ch: string;
+  wander: number;
+};
 
 function colorFor(
   phase: TypographicFieldProps["phase"],
@@ -62,114 +94,226 @@ export function TypographicField({
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    const cfg = MODES[mode] ?? MODES.landing;
-    const start = performance.now();
+    const cfg = CONFIG[mode] ?? CONFIG.landing;
     let raf = 0;
     let disposed = false;
-    let cols = 0;
-    let rows = 0;
-    let cell = cfg.cell;
-    let last = 0;
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let lastDraw = 0;
+    let particles: Particle[] = [];
+    const pointer = { x: -9999, y: -9999, active: false };
 
-    const draw = (now: number) => {
-      const rectW = canvas.clientWidth;
-      const rectH = canvas.clientHeight;
-      if (rectW < 2 || rectH < 2 || cols < 1 || rows < 1) return;
-
-      ctx.clearRect(0, 0, rectW, rectH);
-
-      const t = (now - start) / 1000;
-      const pulse = Math.max(0, pulseUntil.current - now) / 1400;
-      const currentPhase = phaseRef.current;
-      const accent =
-        (currentPhase === "paid"
-          ? 0.7
-          : currentPhase === "review"
-            ? 0.45
-            : 0) + pulse * 0.5;
-      const [r, g, b] = colorFor(currentPhase, accent);
-
-      const blobs = [
-        {
-          x: cfg.cx + Math.sin(t * 0.55) * 0.14,
-          y: cfg.cy + Math.cos(t * 0.42) * 0.12,
-          r: 0.22,
-          k: 1,
-        },
-        {
-          x: cfg.cx + Math.cos(t * 0.33 + 1.7) * 0.2,
-          y: cfg.cy + Math.sin(t * 0.48 + 0.6) * 0.16,
-          r: 0.16,
-          k: 0.7,
-        },
-        {
-          x: cfg.cx + Math.sin(t * 0.72 + 3.1) * 0.1,
-          y: cfg.cy + Math.cos(t * 0.61 + 2.2) * 0.18,
-          r: 0.11,
-          k: 0.5,
-        },
-      ];
-
-      for (let y = 0; y < rows; y += 1) {
-        const ny = (y + 0.5) / rows;
-        for (let x = 0; x < cols; x += 1) {
-          const nx = (x + 0.5) / cols;
-          let v = 0;
-          for (const blob of blobs) {
-            const dx = nx - blob.x;
-            const dy = ny - blob.y;
-            v += blob.k * Math.exp(-(dx * dx + dy * dy) / (2 * blob.r * blob.r));
-          }
-          const d = Math.hypot(nx - cfg.cx, ny - cfg.cy);
-          const mask = Math.max(0, 1 - Math.pow(d / cfg.radius, 2));
-          v *= mask;
-          v += pulse * 0.3 * Math.exp(-(d * d) / 0.18);
-          if (v < 0.03) continue;
-
-          const idx = Math.min(
-            RAMP.length - 1,
-            Math.floor(v * (RAMP.length - 1) * 1.35),
-          );
-          const ch = RAMP[idx];
-          if (ch === " ") continue;
-
-          const alpha = Math.min(0.92, 0.16 + v * 0.95);
-          ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-          ctx.fillText(ch, x * cell, y * cell);
-        }
-      }
-    };
-
-    const loop = (now: number) => {
-      if (disposed) return;
-      if (now - last > 1000 / 30) {
-        last = now;
-        draw(now);
-      }
-      raf = requestAnimationFrame(loop);
+    const makeParticles = () => {
+      const mobile = window.innerWidth < 720;
+      const count = Math.round(cfg.count * (mobile ? 0.55 : 1));
+      const cx = width * cfg.tx;
+      const cy = height * cfg.ty;
+      const spreadX = Math.min(width * 0.22, 260);
+      const spreadY = Math.min(height * 0.22, 220);
+      particles = Array.from({ length: count }, () => ({
+        x: cx + (Math.random() - 0.5) * spreadX,
+        y: cy + (Math.random() - 0.5) * spreadY,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        ch: CHARS[Math.floor(Math.random() * CHARS.length)],
+        wander: Math.random() * Math.PI * 2,
+      }));
     };
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
+      width = rect.width;
+      height = rect.height;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cell = cfg.cell;
-      cols = Math.ceil(rect.width / cell);
-      rows = Math.ceil(rect.height / cell);
-      ctx.font = `${cell - 1}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
-      ctx.textBaseline = "top";
+      ctx.font = `${cfg.size}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+      ctx.textBaseline = "middle";
       ctx.textAlign = "left";
-      if (!animate) draw(start);
+      if (!particles.length) {
+        makeParticles();
+      } else {
+        for (const p of particles) {
+          p.x = Math.min(p.x, width);
+          p.y = Math.min(p.y, height);
+        }
+      }
+      draw();
+    };
+
+    const step = (dt: number) => {
+      const currentPhase = phaseRef.current;
+      const pulse =
+        Math.max(0, pulseUntil.current - performance.now()) / 1400;
+      const speedLimit =
+        cfg.speed *
+        (currentPhase === "paid" ? 1.45 : 1) *
+        (1 + pulse * 0.35);
+
+      const n = particles.length;
+      const neighbor2 = 48 * 48;
+      const sep2 = 22 * 22;
+
+      for (let i = 0; i < n; i += 1) {
+        const p = particles[i];
+        let ax = 0;
+        let ay = 0;
+        let alignX = 0;
+        let alignY = 0;
+        let cohX = 0;
+        let cohY = 0;
+        let sepX = 0;
+        let sepY = 0;
+        let neighbors = 0;
+
+        for (let j = 0; j < n; j += 1) {
+          if (i === j) continue;
+          const q = particles[j];
+          const dx = q.x - p.x;
+          const dy = q.y - p.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > neighbor2 || d2 === 0) continue;
+          const d = Math.sqrt(d2);
+          alignX += q.vx;
+          alignY += q.vy;
+          cohX += q.x;
+          cohY += q.y;
+          neighbors += 1;
+          if (d2 < sep2) {
+            sepX -= dx / d;
+            sepY -= dy / d;
+          }
+        }
+
+        const now = performance.now() / 1000;
+        const targetX =
+          width * cfg.tx + Math.sin(now * 0.18) * width * cfg.amp;
+        const targetY =
+          height * cfg.ty + Math.cos(now * 0.13) * height * cfg.amp;
+        ax += (targetX - p.x) * 0.0008;
+        ay += (targetY - p.y) * 0.0008;
+
+        if (neighbors > 0) {
+          ax += (alignX / neighbors - p.vx) * 0.06;
+          ay += (alignY / neighbors - p.vy) * 0.06;
+          ax += (cohX / neighbors - p.x) * 0.006;
+          ay += (cohY / neighbors - p.y) * 0.006;
+          ax += sepX * 0.12;
+          ay += sepY * 0.12;
+        }
+
+        p.wander += (Math.random() - 0.5) * 0.2;
+        ax += Math.cos(p.wander) * 0.006;
+        ay += Math.sin(p.wander) * 0.006;
+
+        if (pointer.active) {
+          const dx = p.x - pointer.x;
+          const dy = p.y - pointer.y;
+          const d2 = dx * dx + dy * dy;
+          const radius = 190;
+          if (d2 < radius * radius && d2 > 1) {
+            const d = Math.sqrt(d2);
+            const force = (1 - d / radius) * 1.1;
+            ax += (dx / d) * force;
+            ay += (dy / d) * force;
+          }
+        }
+
+        const margin = 60;
+        if (p.x < margin) ax += (margin - p.x) * 0.004;
+        if (p.x > width - margin) ax -= (p.x - (width - margin)) * 0.004;
+        if (p.y < margin) ay += (margin - p.y) * 0.004;
+        if (p.y > height - margin) ay -= (p.y - (height - margin)) * 0.004;
+
+        const maxForce = 0.12;
+        ax = Math.max(-maxForce, Math.min(maxForce, ax));
+        ay = Math.max(-maxForce, Math.min(maxForce, ay));
+
+        p.vx += ax * dt;
+        p.vy += ay * dt;
+
+        const speed = Math.hypot(p.vx, p.vy);
+        if (speed > speedLimit) {
+          p.vx = (p.vx / speed) * speedLimit;
+          p.vy = (p.vy / speed) * speedLimit;
+        }
+
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        if (p.x < -20) p.x = width + 20;
+        else if (p.x > width + 20) p.x = -20;
+        if (p.y < -20) p.y = height + 20;
+        else if (p.y > height + 20) p.y = -20;
+
+        if (Math.random() < 0.003) {
+          p.ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+        }
+      }
+    };
+
+    const draw = () => {
+      if (width < 2 || height < 2) return;
+      ctx.clearRect(0, 0, width, height);
+      const currentPhase = phaseRef.current;
+      const pulse =
+        Math.max(0, pulseUntil.current - performance.now()) / 1400;
+      const accent =
+        (currentPhase === "paid" ? 0.7 : currentPhase === "review" ? 0.5 : 0) +
+        pulse * 0.4;
+      const [r, g, b] = colorFor(currentPhase, accent);
+      const speedLimit =
+        cfg.speed *
+        (currentPhase === "paid" ? 1.45 : 1) *
+        (1 + pulse * 0.35);
+
+      ctx.font = `${cfg.size}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+      for (const p of particles) {
+        const speed = Math.hypot(p.vx, p.vy) / speedLimit;
+        const alpha =
+          Math.min(0.9, 0.12 + speed * 0.55 + pulse * 0.25) * cfg.opacity;
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+        ctx.fillText(p.ch, p.x, p.y);
+      }
+    };
+
+    const loop = (now: number) => {
+      if (disposed) return;
+      raf = requestAnimationFrame(loop);
+      if (now - lastDraw < 1000 / 30) return;
+      const dt = Math.min(2, (now - lastDraw) / 33) || 1;
+      lastDraw = now;
+      step(dt);
+      draw();
+    };
+
+    const onMove = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = event.clientX - rect.left;
+      pointer.y = event.clientY - rect.top;
+      pointer.active = true;
+    };
+
+    const onDown = (event: PointerEvent) => {
+      onMove(event);
+    };
+
+    const onUp = () => {
+      pointer.active = false;
+    };
+
+    const onLeave = () => {
+      pointer.active = false;
     };
 
     const onVisibility = () => {
       if (document.hidden) {
         cancelAnimationFrame(raf);
       } else if (animate) {
-        last = 0;
+        lastDraw = 0;
         raf = requestAnimationFrame(loop);
       }
     };
@@ -179,15 +323,25 @@ export function TypographicField({
     resize();
 
     if (animate) raf = requestAnimationFrame(loop);
-    else draw(start);
+    else draw();
 
-    window.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    window.addEventListener("pointerup", onUp, { passive: true });
+    window.addEventListener("pointercancel", onUp, { passive: true });
+    window.addEventListener("pointerleave", onLeave, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
       ro.disconnect();
-      window.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointerleave", onLeave);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [mode, animate]);
 

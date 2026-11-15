@@ -916,3 +916,109 @@ button:focus-visible,
     font-size: 1.35rem;
   }
 }
+
+/* Full-bleed flocking ASCII field */
+.orb-layer--landing {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+}
+
+.orb-layer--landing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--bg) 0%,
+    var(--bg) 38%,
+    rgba(5, 5, 5, 0.88) 56%,
+    rgba(5, 5, 5, 0.22) 80%,
+    transparent 94%
+  );
+  pointer-events: none;
+}
+
+.orb-layer--door {
+  position: fixed;
+  inset: 0;
+  opacity: 0.45;
+}
+
+.landing {
+  max-width: 1440px;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 2.5vw, 2.5rem);
+  display: flex;
+  align-items: center;
+}
+
+.landing-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.backdrop-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 30;
+  border: 1px solid var(--line);
+  background: rgba(5, 5, 5, 0.6);
+  color: var(--gray);
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.backdrop-toggle:hover,
+.backdrop-toggle:focus-visible {
+  color: var(--white);
+  border-color: var(--white);
+  outline: 2px solid var(--ok);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .landing {
+    min-height: 100svh;
+    padding: 1.25rem;
+  }
+
+  .landing-copy {
+    max-width: none;
+  }
+
+  .orb-layer--landing::after {
+    background: linear-gradient(
+      180deg,
+      rgba(5, 5, 5, 0.94) 0%,
+      rgba(5, 5, 5, 0.9) 55%,
+      rgba(5, 5, 5, 0.72) 100%
+    );
+  }
+
+  .landing-quote {
+    max-width: none;
+  }
+
+  .info-body .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero h1 {
+    max-width: none;
+    font-size: clamp(2.2rem, 9vw, 3.4rem);
+  }
+}

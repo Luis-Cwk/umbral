@@ -48,7 +48,6 @@ export function Orb({
     mode === "landing" ? "orb-layer--landing" : "",
     mode === "door" ? "orb-layer--door" : "",
     mode === "header" ? "orb-layer--header" : "",
-    mode === "panel" ? "orb-layer--panel" : "",
     className ?? "",
   ]
     .filter(Boolean)
