@@ -1,0 +1,33 @@
+---
+description: Umbral project rules, context and hard constraints
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Umbral
+
+Read `CURSOR_PROMPT.md` first. Then `SPEC.md`, `ACCEPTANCE.md`, `docs/pey-api-notes.md`, `docs/demo-script.md` and `README.md`.
+
+## Goal
+
+A door that only opens when a CoDi payment is confirmed by a signed pey webhook. Deadline: Sunday, November 15, 2026, 1:00 PM CDMX.
+
+## Hard constraints
+
+- CoDi through the pey API only. No crypto, NFT, x402, USDC or ERC-8004.
+- No LLM or agent in the payment path. The door is deterministic.
+- Verify the Standard Webhooks signature before reading the payload.
+- Idempotency by `webhook-id` and `transactionId`.
+- The door never opens from `charge_issued`, `expired` or `invited`.
+- One active charge per guest. Never reissue while the previous one may settle.
+- No secrets in the repo. Never commit a CLABE, API key, webhook secret or Supabase service key.
+- Run `npm run build` before every commit.
+- Do not delete the existing implementation. Review, test and extend.
+
+## Current state
+
+The repo already has `app/`, `lib/`, `SPEC.md`, `ACCEPTANCE.md`, `README.md` and the pey API notes. The database schema, seed, test script, taquilla page, door page, demo page and the remaining API routes are missing. `CURSOR_PROMPT.md` has the full list.
+
+## First move
+
+`npm install`, `npm run build`, then create `db/schema.sql`, `db/seed.sql` and `scripts/test-pey.ts`. Report the build result and the pey smoke test output before building UI.
