@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { Backdrop } from "@/components/Backdrop";
 import { QrImage } from "@/components/QrImage";
 import { api, getStaffPin, setStaffPin } from "@/lib/client";
 import { resolveEventId } from "@/lib/demo";
@@ -86,7 +87,9 @@ export default function TaquillaPage() {
   }, [selected, now]);
 
   return (
-    <main>
+    <>
+      <Backdrop mode="taquilla" pulseKey={state?.totals.paid ?? 0} />
+      <main>
       <header className="topbar">
         <div>
           <p className="kicker">
@@ -304,5 +307,6 @@ export default function TaquillaPage() {
         </div>
       ) : null}
     </main>
+    </>
   );
 }

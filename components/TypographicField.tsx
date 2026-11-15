@@ -2,8 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
+export type FieldMode = "landing" | "door" | "header" | "taquilla" | "demo";
+
 export type TypographicFieldProps = {
-  mode?: "landing" | "door" | "header";
+  mode?: FieldMode;
   phase?: "closed" | "paid" | "inside" | "review";
   pulseKey?: number | string;
   animate?: boolean;
@@ -12,6 +14,8 @@ export type TypographicFieldProps = {
 const RAMP = " .:-=+*#%@";
 const CHARS = RAMP.slice(1);
 
+// Same physics, different weights: tight flock on the landing, a slow
+// wide drift on the taquilla, a denser and faster field on the demo.
 const CONFIG = {
   landing: {
     count: 300,
@@ -21,6 +25,12 @@ const CONFIG = {
     tx: 0.68,
     ty: 0.45,
     amp: 0.18,
+    spreadX: 0.22,
+    spreadY: 0.26,
+    pull: 0.0008,
+    align: 0.06,
+    coh: 0.006,
+    sep: 0.12,
   },
   door: {
     count: 180,
@@ -30,6 +40,12 @@ const CONFIG = {
     tx: 0.5,
     ty: 0.5,
     amp: 0.18,
+    spreadX: 0.22,
+    spreadY: 0.22,
+    pull: 0.0008,
+    align: 0.06,
+    coh: 0.006,
+    sep: 0.12,
   },
   header: {
     count: 40,
@@ -39,6 +55,42 @@ const CONFIG = {
     tx: 0.5,
     ty: 0.5,
     amp: 0.1,
+    spreadX: 0.5,
+    spreadY: 0.5,
+    pull: 0.0004,
+    align: 0.04,
+    coh: 0.004,
+    sep: 0.08,
+  },
+  taquilla: {
+    count: 380,
+    speed: 0.45,
+    opacity: 0.5,
+    size: 9,
+    tx: 0.5,
+    ty: 0.55,
+    amp: 0.36,
+    spreadX: 0.95,
+    spreadY: 0.9,
+    pull: 0.00006,
+    align: 0.004,
+    coh: 0.0004,
+    sep: 0.05,
+  },
+  demo: {
+    count: 260,
+    speed: 1.35,
+    opacity: 0.38,
+    size: 9,
+    tx: 0.5,
+    ty: 0.5,
+    amp: 0.24,
+    spreadX: 0.6,
+    spreadY: 0.55,
+    pull: 0.00025,
+    align: 0.03,
+    coh: 0.002,
+    sep: 0.09,
   },
 } as const;
 
@@ -109,8 +161,8 @@ export function TypographicField({
       const count = Math.round(cfg.count * (mobile ? 0.55 : 1));
       const cx = width * cfg.tx;
       const cy = height * cfg.ty;
-      const spreadX = Math.min(width * 0.28, 340);
-      const spreadY = Math.min(height * 0.26, 280);
+      const spreadX = Math.min(width * cfg.spreadX, width);
+      const spreadY = Math.min(height * cfg.spreadY, height);
       particles = Array.from({ length: count }, () => ({
         x: cx + (Math.random() - 0.5) * spreadX,
         y: cy + (Math.random() - 0.5) * spreadY,
@@ -193,16 +245,16 @@ export function TypographicField({
           width * cfg.tx + Math.sin(now * 0.18) * width * cfg.amp;
         const targetY =
           height * cfg.ty + Math.cos(now * 0.13) * height * cfg.amp;
-        ax += (targetX - p.x) * 0.0008;
-        ay += (targetY - p.y) * 0.0008;
+        ax += (targetX - p.x) * cfg.pull;
+        ay += (targetY - p.y) * cfg.pull;
 
         if (neighbors > 0) {
-          ax += (alignX / neighbors - p.vx) * 0.06;
-          ay += (alignY / neighbors - p.vy) * 0.06;
-          ax += (cohX / neighbors - p.x) * 0.006;
-          ay += (cohY / neighbors - p.y) * 0.006;
-          ax += sepX * 0.12;
-          ay += sepY * 0.12;
+          ax += (alignX / neighbors - p.vx) * cfg.align;
+          ay += (alignY / neighbors - p.vy) * cfg.align;
+          ax += (cohX / neighbors - p.x) * cfg.coh;
+          ay += (cohY / neighbors - p.y) * cfg.coh;
+          ax += sepX * cfg.sep;
+          ay += sepY * cfg.sep;
         }
 
         p.wander += (Math.random() - 0.5) * 0.2;

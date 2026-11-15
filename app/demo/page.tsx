@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { Backdrop } from "@/components/Backdrop";
 import { QrImage } from "@/components/QrImage";
 import { api, getStaffPin, setStaffPin } from "@/lib/client";
 import { DEMO_EVENT_ID } from "@/lib/demo";
@@ -42,6 +43,15 @@ export default function DemoPage() {
   const guest =
     state?.guests.find((g) => g.id === selected) ?? state?.guests[0] ?? null;
 
+  const fieldPhase =
+    guest?.status === "paid"
+      ? "paid"
+      : guest?.status === "late"
+        ? "review"
+        : guest?.status === "admitted"
+          ? "inside"
+          : "closed";
+
   const run = async (key: string, fn: () => Promise<void>) => {
     setBusy(key);
     setError(null);
@@ -57,7 +67,13 @@ export default function DemoPage() {
   };
 
   return (
-    <main>
+    <>
+      <Backdrop
+        mode="demo"
+        phase={fieldPhase}
+        pulseKey={state?.totals.paid ?? 0}
+      />
+      <main>
       <header className="topbar">
         <div>
           <p className="kicker">
@@ -255,5 +271,6 @@ export default function DemoPage() {
         </>
       ) : null}
     </main>
+    </>
   );
 }

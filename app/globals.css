@@ -70,6 +70,8 @@ input {
 }
 
 main {
+  position: relative;
+  z-index: 1;
   width: min(1040px, calc(100% - 2.5rem));
   margin: 0 auto;
   padding: 2rem 0 4rem;
@@ -945,6 +947,20 @@ button:focus-visible,
   position: fixed;
   inset: 0;
   opacity: 0.45;
+}
+
+.orb-layer--taquilla,
+.orb-layer--demo {
+  position: fixed;
+  inset: 0;
+}
+
+.orb-layer--taquilla {
+  opacity: 0.8;
+}
+
+.orb-layer--demo {
+  opacity: 0.8;
 }
 
 .landing {

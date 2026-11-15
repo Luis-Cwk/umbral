@@ -43,13 +43,7 @@ export function Orb({
     setAutoAnimate(autoShouldAnimate());
   }, []);
 
-  const layerClass = [
-    "orb-layer",
-    mode === "landing" ? "orb-layer--landing" : "",
-    mode === "door" ? "orb-layer--door" : "",
-    mode === "header" ? "orb-layer--header" : "",
-    className ?? "",
-  ]
+  const layerClass = ["orb-layer", `orb-layer--${mode}`, className ?? ""]
     .filter(Boolean)
     .join(" ");
 

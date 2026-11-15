@@ -1,5 +1,5 @@
-import { Orb } from "./Orb";
+import { Orb, type OrbProps } from "./Orb";
 
-export function Backdrop() {
-  return <Orb mode="landing" phase="closed" animate />;
+export function Backdrop(props: Omit<OrbProps, "animate">) {
+  return <Orb {...props} animate />;
 }
