@@ -13,7 +13,7 @@ export default function Home() {
       <Backdrop />
       <main id="contenido" className="landing">
         <section className="landing-copy">
-          <div className="landing-hero">
+          <div className="landing-hero field-copy" data-field-obstacle>
             <p className="kicker">Umbral / CDMX 2026</p>
             <h1>La puerta que solo abre cuando el dinero ya cayó.</h1>
             <div className="actions">

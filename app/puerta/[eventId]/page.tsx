@@ -112,7 +112,7 @@ function PuertaInner() {
   return (
     <div className="door">
       <Backdrop mode="door" phase={phase} pulseKey={pulseKey} />
-      <div className="door-frame">
+      <div className="door-frame field-copy" data-field-obstacle>
         <p className="kicker">
           Umbral{state?.event.is_demo ? " · demo" : ""}
         </p>

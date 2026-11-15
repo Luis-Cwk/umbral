@@ -91,7 +91,7 @@ export default function TaquillaPage() {
       <Backdrop mode="taquilla" pulseKey={state?.totals.paid ?? 0} />
       <main>
       <header className="topbar">
-        <div>
+        <div data-field-obstacle className="field-copy">
           <p className="kicker">
             Umbral / Taquilla
             {state?.event.is_demo ? <span className="tag">Demo</span> : null}

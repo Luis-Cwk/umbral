@@ -103,6 +103,8 @@ type Particle = {
   wander: number;
 };
 
+type Obstacle = { l: number; t: number; r: number; b: number };
+
 function colorFor(
   phase: TypographicFieldProps["phase"],
   accent: number,
@@ -117,6 +119,10 @@ function colorFor(
     Math.round(base[1] + (highlight[1] - base[1]) * t),
     Math.round(base[2] + (highlight[2] - base[2]) * t),
   ];
+}
+
+function desiredCount(base: number): number {
+  return Math.round(base * (window.innerWidth < 720 ? 0.55 : 1));
 }
 
 export function TypographicField({
@@ -153,12 +159,14 @@ export function TypographicField({
     let height = 0;
     let dpr = 1;
     let lastDraw = 0;
+    let frame = 0;
     let particles: Particle[] = [];
+    let obstacles: Obstacle[] = [];
     const pointer = { x: -9999, y: -9999, active: false };
+    const root = document.documentElement;
 
     const makeParticles = () => {
-      const mobile = window.innerWidth < 720;
-      const count = Math.round(cfg.count * (mobile ? 0.55 : 1));
+      const count = desiredCount(cfg.count);
       const cx = width * cfg.tx;
       const cy = height * cfg.ty;
       const spreadX = Math.min(width * cfg.spreadX, width);
@@ -173,27 +181,92 @@ export function TypographicField({
       }));
     };
 
+    const refreshObstacles = () => {
+      const canvasRect = canvas.getBoundingClientRect();
+      obstacles = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-field-obstacle]"),
+      ).map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          l: r.left - canvasRect.left,
+          t: r.top - canvasRect.top,
+          r: r.right - canvasRect.left,
+          b: r.bottom - canvasRect.top,
+        };
+      });
+    };
+
     const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      if (rect.width < 2 || rect.height < 2) return;
-      width = rect.width;
-      height = rect.height;
+      const host = canvas.parentElement ?? canvas;
+      const rect = host.getBoundingClientRect();
+      const nextW = Math.max(rect.width, window.innerWidth);
+      const nextH = Math.max(rect.height, window.innerHeight);
+      if (nextW < 2 || nextH < 2) return;
+
+      const prevW = width;
+      const prevH = height;
+      width = nextW;
+      height = nextH;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.font = `${cfg.size}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
-      if (!particles.length) {
+
+      const want = desiredCount(cfg.count);
+      if (!particles.length || Math.abs(particles.length - want) > 8) {
         makeParticles();
-      } else {
+      } else if (prevW > 0 && prevH > 0) {
+        const sx = width / prevW;
+        const sy = height / prevH;
         for (const p of particles) {
-          p.x = Math.min(p.x, width);
-          p.y = Math.min(p.y, height);
+          p.x *= sx;
+          p.y *= sy;
         }
       }
+
+      refreshObstacles();
       draw();
+    };
+
+    const pushFromObstacles = (p: Particle, ax: number, ay: number) => {
+      let outX = ax;
+      let outY = ay;
+      const pad =
+        mode === "landing" || mode === "door"
+          ? 36
+          : mode === "taquilla" || mode === "demo"
+            ? 28
+            : 18;
+      for (const o of obstacles) {
+        const l = o.l - pad;
+        const t = o.t - pad;
+        const r = o.r + pad;
+        const b = o.b + pad;
+        if (p.x < l || p.x > r || p.y < t || p.y > b) continue;
+        const left = p.x - l;
+        const right = r - p.x;
+        const top = p.y - t;
+        const bottom = b - p.y;
+        const min = Math.min(left, right, top, bottom);
+        const force = 0.18;
+        if (min === left) outX -= force;
+        else if (min === right) outX += force;
+        else if (min === top) outY -= force;
+        else outY += force;
+      }
+      return { ax: outX, ay: outY };
+    };
+
+    const publishField = (cx: number, cy: number, pulse: number) => {
+      if (width < 1 || height < 1) return;
+      root.style.setProperty("--umbral-field-x", (cx / width).toFixed(4));
+      root.style.setProperty("--umbral-field-y", (cy / height).toFixed(4));
+      root.style.setProperty("--umbral-field-pulse", pulse.toFixed(3));
     };
 
     const step = (dt: number) => {
@@ -208,6 +281,8 @@ export function TypographicField({
       const n = particles.length;
       const neighbor2 = 48 * 48;
       const sep2 = 22 * 22;
+      let massX = 0;
+      let massY = 0;
 
       for (let i = 0; i < n; i += 1) {
         const p = particles[i];
@@ -274,6 +349,8 @@ export function TypographicField({
           }
         }
 
+        ({ ax, ay } = pushFromObstacles(p, ax, ay));
+
         const margin = 60;
         if (p.x < margin) ax += (margin - p.x) * 0.004;
         if (p.x > width - margin) ax -= (p.x - (width - margin)) * 0.004;
@@ -295,6 +372,8 @@ export function TypographicField({
 
         p.x += p.vx * dt;
         p.y += p.vy * dt;
+        massX += p.x;
+        massY += p.y;
 
         if (p.x < -20) p.x = width + 20;
         else if (p.x > width + 20) p.x = -20;
@@ -305,6 +384,8 @@ export function TypographicField({
           p.ch = CHARS[Math.floor(Math.random() * CHARS.length)];
         }
       }
+
+      if (n > 0) publishField(massX / n, massY / n, pulse);
     };
 
     const draw = () => {
@@ -338,6 +419,8 @@ export function TypographicField({
       if (now - lastDraw < 1000 / 30) return;
       const dt = Math.min(2, (now - lastDraw) / 33) || 1;
       lastDraw = now;
+      frame += 1;
+      if (frame % 12 === 0) refreshObstacles();
       step(dt);
       draw();
     };
@@ -371,7 +454,10 @@ export function TypographicField({
     };
 
     const ro = new ResizeObserver(() => resize());
-    ro.observe(canvas);
+    ro.observe(canvas.parentElement ?? canvas);
+    window.addEventListener("resize", resize, { passive: true });
+    window.visualViewport?.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("scroll", resize);
     resize();
 
     if (animate) raf = requestAnimationFrame(loop);
@@ -388,12 +474,18 @@ export function TypographicField({
       disposed = true;
       cancelAnimationFrame(raf);
       ro.disconnect();
+      window.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("scroll", resize);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
       window.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("visibilitychange", onVisibility);
+      root.style.removeProperty("--umbral-field-x");
+      root.style.removeProperty("--umbral-field-y");
+      root.style.removeProperty("--umbral-field-pulse");
     };
   }, [mode, animate]);
 

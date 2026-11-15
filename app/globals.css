@@ -10,6 +10,9 @@
   --bad: #ff5a5a;
   --bg: #000;
   --panel: #111;
+  --umbral-field-x: 0.5;
+  --umbral-field-y: 0.5;
+  --umbral-field-pulse: 0;
 }
 
 * {
@@ -20,6 +23,10 @@ html,
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--white);
   font-family: "Space Grotesk", system-ui, sans-serif;
@@ -446,6 +453,9 @@ h2 {
   isolation: isolate;
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: 100svh;
+  width: 100%;
+  overflow: hidden;
   display: grid;
   grid-template-rows: 1fr auto;
   background: #000;
@@ -920,11 +930,19 @@ button:focus-visible,
 }
 
 /* Full-bleed flocking ASCII field */
-.orb-layer--landing {
+.orb-layer--landing,
+.orb-layer--door,
+.orb-layer--taquilla,
+.orb-layer--demo {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.orb-layer--landing {
   opacity: 0.9;
 }
 
@@ -944,15 +962,7 @@ button:focus-visible,
 }
 
 .orb-layer--door {
-  position: fixed;
-  inset: 0;
   opacity: 0.45;
-}
-
-.orb-layer--taquilla,
-.orb-layer--demo {
-  position: fixed;
-  inset: 0;
 }
 
 .orb-layer--taquilla {
@@ -961,6 +971,28 @@ button:focus-visible,
 
 .orb-layer--demo {
   opacity: 0.8;
+}
+
+/* Copy yields to the flock centroid on every screen (Pretext-like). */
+.field-copy {
+  transform: translate3d(
+    calc((0.5 - var(--umbral-field-x)) * 16px),
+    calc((0.5 - var(--umbral-field-y)) * 10px),
+    0
+  );
+  will-change: transform;
+}
+
+.field-copy h1 {
+  letter-spacing: calc(-0.045em + var(--umbral-field-pulse) * 0.018em);
+}
+
+.door-name {
+  transform: translate3d(
+    calc((0.5 - var(--umbral-field-x)) * 8px),
+    calc((0.5 - var(--umbral-field-y)) * 4px),
+    0
+  );
 }
 
 .landing {

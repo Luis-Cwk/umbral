@@ -75,7 +75,7 @@ export default function DemoPage() {
       />
       <main>
       <header className="topbar">
-        <div>
+        <div data-field-obstacle className="field-copy">
           <p className="kicker">
             Umbral / Demo <span className="tag">Demo</span>
           </p>
@@ -265,7 +265,7 @@ export default function DemoPage() {
               <strong>
                 ${(state.totals.amountPaidCents / 100).toFixed(2)}
               </strong>
-              <span className="meta">total</span>
+              <span className="meta">corte</span>
             </div>
           </div>
         </>
