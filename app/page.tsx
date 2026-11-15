@@ -11,23 +11,20 @@ export default function Home() {
       <main id="contenido" className="landing">
         <section className="landing-copy">
           <div className="landing-hero">
-            <p className="kicker">Umbral / Hackatón México 2026</p>
+            <p className="kicker">Umbral / CDMX 2026</p>
             <h1>La puerta que solo abre cuando el dinero ya cayó.</h1>
-            <p className="lede">
-              Taquilla con cobros CoDi. La puerta abre con el webhook firmado.
-            </p>
             <div className="actions">
               <Link
                 className="btn"
                 href="/taquilla/00000000-0000-0000-0000-000000000001"
               >
-                Taquilla
+                Abrir taquilla
               </Link>
               <Link
-                className="btn"
+                className="btn btn--ghost"
                 href="/puerta/00000000-0000-0000-0000-000000000001?token=demo-token"
               >
-                Puerta
+                Ver puerta
               </Link>
             </div>
 
@@ -51,11 +48,6 @@ export default function Home() {
               </div>
             </details>
           </div>
-
-          <blockquote className="landing-quote">
-            <p>“El pago no es un botón. Es un umbral.”</p>
-            <footer>Umbral / CDMX 2026</footer>
-          </blockquote>
         </section>
       </main>
     </>

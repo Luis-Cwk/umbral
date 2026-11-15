@@ -14,13 +14,13 @@ const CHARS = RAMP.slice(1);
 
 const CONFIG = {
   landing: {
-    count: 220,
+    count: 300,
     speed: 1,
     opacity: 0.8,
     size: 11,
     tx: 0.68,
     ty: 0.45,
-    amp: 0.16,
+    amp: 0.18,
   },
   door: {
     count: 180,
@@ -109,8 +109,8 @@ export function TypographicField({
       const count = Math.round(cfg.count * (mobile ? 0.55 : 1));
       const cx = width * cfg.tx;
       const cy = height * cfg.ty;
-      const spreadX = Math.min(width * 0.22, 260);
-      const spreadY = Math.min(height * 0.22, 220);
+      const spreadX = Math.min(width * 0.28, 340);
+      const spreadY = Math.min(height * 0.26, 280);
       particles = Array.from({ length: count }, () => ({
         x: cx + (Math.random() - 0.5) * spreadX,
         y: cy + (Math.random() - 0.5) * spreadY,

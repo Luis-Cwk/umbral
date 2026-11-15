@@ -1022,3 +1022,74 @@ button:focus-visible,
     font-size: clamp(2.2rem, 9vw, 3.4rem);
   }
 }
+
+/* Tight editorial landing */
+.landing-copy {
+  max-width: 620px;
+  gap: 1.5rem;
+}
+
+.landing-hero h1 {
+  max-width: 13ch;
+  font-size: clamp(2.2rem, 4.4vw, 4rem);
+}
+
+.landing .actions {
+  gap: 0.6rem;
+}
+
+.landing .actions .btn {
+  min-height: 2.7rem;
+  padding: 0 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  color: var(--white);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.landing .actions .btn:first-child {
+  background: var(--white);
+  border-color: var(--white);
+  color: var(--black);
+}
+
+.landing .actions .btn:first-child:hover,
+.landing .actions .btn:first-child:focus-visible {
+  background: #d8d8d8;
+  border-color: #d8d8d8;
+  color: var(--black);
+}
+
+.landing .actions .btn--ghost:hover,
+.landing .actions .btn--ghost:focus-visible {
+  background: var(--white);
+  border-color: var(--white);
+  color: var(--black);
+}
+
+.info {
+  margin-top: 0.75rem;
+}
+
+.info summary {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--gray);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+}
+
+.info[open] summary {
+  color: var(--white);
+  border-color: transparent;
+}
+
+.info summary:hover,
+.info summary:focus-visible {
+  border-color: transparent;
+}
