@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Backdrop } from "@/components/Backdrop";
 
-const EVENT_ID = "81315739-ae0c-4408-9858-8a856d9a6745";
-const DOOR_TOKEN = "19f23bdf6b794f24995e6acf";
+const EVENT_ID = "7134e66a-1d64-4601-aea7-1af257198c0f";
+const DOOR_TOKEN = "d7ef0c843119410b844032ff";
 
 export default function Home() {
   return (

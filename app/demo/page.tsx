@@ -247,7 +247,7 @@ export default function DemoPage() {
           <div className="totals">
             <div>
               <strong>{state.totals.paid}</strong>
-              <span className="meta">con pago</span>
+              <span className="meta">por entrar</span>
             </div>
             <div>
               <strong>{state.totals.pending}</strong>
