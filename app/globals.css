@@ -966,30 +966,6 @@ button:focus-visible,
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
-.backdrop-toggle {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 30;
-  border: 1px solid var(--line);
-  background: rgba(5, 5, 5, 0.6);
-  color: var(--gray);
-  padding: 0.4rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.58rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  backdrop-filter: blur(6px);
-}
-
-.backdrop-toggle:hover,
-.backdrop-toggle:focus-visible {
-  color: var(--white);
-  border-color: var(--white);
-  outline: 2px solid var(--ok);
-  outline-offset: 2px;
-}
-
 @media (max-width: 900px) {
   .landing {
     min-height: 100svh;
@@ -1029,13 +1005,19 @@ button:focus-visible,
   gap: 1.5rem;
 }
 
+.landing-hero .kicker {
+  margin-bottom: 0.75rem;
+}
+
 .landing-hero h1 {
   max-width: 13ch;
+  margin: 0.4rem 0 1.75rem;
   font-size: clamp(2.2rem, 4.4vw, 4rem);
 }
 
 .landing .actions {
   gap: 0.6rem;
+  margin-top: 0;
 }
 
 .landing .actions .btn {
@@ -1071,7 +1053,7 @@ button:focus-visible,
 }
 
 .info {
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
 }
 
 .info summary {
