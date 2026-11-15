@@ -19,6 +19,7 @@ function shouldDisableOrb(): boolean {
   if (typeof window === "undefined") return true;
   const params = new URLSearchParams(window.location.search);
   if (params.get("orb") === "0") return true;
+  if (params.get("orb") === "1") return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return true;
   }

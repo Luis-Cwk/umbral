@@ -22,8 +22,9 @@ function phaseIntensity(phase: OrbSceneProps["phase"]): number {
 }
 
 /**
- * WebGPU point primitives are fixed at 1px — sizeNode is ignored on Points.
- * SpriteNodeMaterial + InstancedMesh is the supported path for visible particles.
+ * A sphere of instanced planes. The per-particle position lives in the
+ * instance matrix, not in a detached attribute, so every particle renders.
+ * TSL only drives color and opacity; it does not move the instances.
  */
 export default function OrbScene({
   phase = "closed",
@@ -131,55 +132,32 @@ export default function OrbScene({
       if (disposed || !host) return;
 
       const count = particleCount();
+      const radius = compact ? 1.05 : 1.4;
       const positions = new Float32Array(count * 3);
+
       for (let i = 0; i < count; i += 1) {
         const u = Math.random();
         const v = Math.random();
         const theta = 2 * Math.PI * u;
         const phi = Math.acos(2 * v - 1);
-        const r = Math.cbrt(Math.random()) * (compact ? 1.05 : 1.4);
+        const r = Math.cbrt(Math.random()) * radius;
         const i3 = i * 3;
         positions[i3] = r * Math.sin(phi) * Math.cos(theta);
         positions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
         positions[i3 + 2] = r * Math.cos(phi);
       }
 
-      const positionAttribute = new THREE.InstancedBufferAttribute(
-        positions,
-        3,
-      );
-
       intensityUniform = tsl.uniform(phaseIntensity(phaseRef.current));
       pulseUniform = tsl.uniform(0);
 
-      const quad = compact ? 0.045 : 0.055;
-      geometry = new THREE.PlaneGeometry(quad, quad);
+      geometry = new THREE.PlaneGeometry(0.03, 0.03);
 
-      material = new THREE.SpriteNodeMaterial({
+      material = new THREE.MeshBasicNodeMaterial({
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
       });
-
-      const basePos = tsl.instancedBufferAttribute(positionAttribute);
-
-      material.positionNode = tsl.Fn(() => {
-        // TSL node typings omit swizzle helpers on InstancedBufferAttribute nodes
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const p: any = basePos;
-        const t = tsl.time.mul(0.2);
-        const wobble = tsl.vec3(
-          tsl.sin(p.y.mul(1.6).add(t)).mul(0.04),
-          tsl.cos(p.x.mul(1.6).add(t)).mul(0.04),
-          tsl.sin(p.x.add(p.y).add(t)).mul(0.04),
-        );
-        return p.add(wobble).mul(tsl.float(1).add(pulseUniform.mul(0.25)));
-      })();
-
-      material.scaleNode = tsl
-        .vec2(compact ? 1.1 : 1.35)
-        .mul(tsl.float(1).add(pulseUniform.mul(1.4)))
-        .mul(tsl.float(0.85).add(intensityUniform.mul(0.55)));
 
       material.colorNode = tsl.Fn(() => {
         const base = tsl.color("#e8e8e8");
@@ -193,9 +171,8 @@ export default function OrbScene({
       })();
 
       material.opacityNode = tsl.Fn(() => {
-        const soft = tsl
-          .float(1)
-          .sub(tsl.uv().sub(0.5).length().mul(2).clamp(0, 1));
+        const dist = tsl.uv().sub(0.5).length();
+        const soft = tsl.float(1).sub(dist.mul(2).clamp(0, 1));
         return soft
           .mul(soft)
           .mul(
@@ -208,12 +185,19 @@ export default function OrbScene({
       })();
 
       mesh = new THREE.InstancedMesh(geometry, material, count);
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled = false;
-      // identity instance matrices — position comes from positionNode
-      const identity = new THREE.Matrix4();
+
+      const dummy = new THREE.Object3D();
       for (let i = 0; i < count; i += 1) {
-        mesh.setMatrixAt(i, identity);
+        const i3 = i * 3;
+        dummy.position.set(
+          positions[i3],
+          positions[i3 + 1],
+          positions[i3 + 2],
+        );
+        dummy.scale.setScalar(0.55 + Math.random() * 0.9);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
       }
       mesh.instanceMatrix.needsUpdate = true;
 
@@ -224,7 +208,7 @@ export default function OrbScene({
       scene.add(group);
 
       camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
-      camera.position.z = compact ? 3.2 : 3.9;
+      camera.position.z = compact ? 3.2 : 3.5;
 
       const makeRenderer = (forceWebGL: boolean) =>
         new THREE.WebGPURenderer({
