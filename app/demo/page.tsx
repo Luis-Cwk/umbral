@@ -100,7 +100,7 @@ export default function DemoPage() {
 
       {error ? <p className="error">{error}</p> : null}
 
-      <h2>Invitada</h2>
+      <h2>Persona</h2>
       <div className="split">
         <div>
           <div className="actions">
@@ -247,7 +247,7 @@ export default function DemoPage() {
           <div className="totals">
             <div>
               <strong>{state.totals.paid}</strong>
-              <span className="meta">pagadas</span>
+              <span className="meta">con pago</span>
             </div>
             <div>
               <strong>{state.totals.pending}</strong>
@@ -255,7 +255,7 @@ export default function DemoPage() {
             </div>
             <div>
               <strong>{state.totals.late}</strong>
-              <span className="meta">tardías</span>
+              <span className="meta">tarde</span>
             </div>
             <div>
               <strong>{state.totals.admitted}</strong>

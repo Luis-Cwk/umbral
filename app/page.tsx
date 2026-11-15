@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Backdrop } from "@/components/Backdrop";
 
+const EVENT_ID = "81315739-ae0c-4408-9858-8a856d9a6745";
+const DOOR_TOKEN = "19f23bdf6b794f24995e6acf";
+
 export default function Home() {
   return (
     <>
@@ -14,15 +17,12 @@ export default function Home() {
             <p className="kicker">Umbral / CDMX 2026</p>
             <h1>La puerta que solo abre cuando el dinero ya cayó.</h1>
             <div className="actions">
-              <Link
-                className="btn"
-                href="/taquilla/00000000-0000-0000-0000-000000000001"
-              >
+              <Link className="btn" href={`/taquilla/${EVENT_ID}`}>
                 Abrir taquilla
               </Link>
               <Link
                 className="btn btn--ghost"
-                href="/puerta/00000000-0000-0000-0000-000000000001?token=demo-token"
+                href={`/puerta/${EVENT_ID}?token=${DOOR_TOKEN}`}
               >
                 Ver puerta
               </Link>

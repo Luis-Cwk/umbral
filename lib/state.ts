@@ -36,14 +36,14 @@ export function paymentTransition(
 
 export function statusLabel(status: GuestStatus): string {
   const labels: Record<GuestStatus, string> = {
-    invited: "Invitada",
+    invited: "Invitación",
     charge_issued: "Cobro emitido",
-    paid: "Pagada",
+    paid: "Pago recibido",
     admitted: "Adentro",
-    expired: "Vencida",
-    late: "Tarde",
-    duplicate: "Duplicada",
-    canceled: "Cancelada",
+    expired: "QR vencido",
+    late: "Pago tardío",
+    duplicate: "Duplicado",
+    canceled: "Cancelado",
   };
   return labels[status];
 }

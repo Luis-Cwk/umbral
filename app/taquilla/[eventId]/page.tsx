@@ -96,7 +96,9 @@ export default function TaquillaPage() {
             Umbral / Taquilla
             {state?.event.is_demo ? <span className="tag">Demo</span> : null}
           </p>
-          <h1>{state?.event.name ?? "Cargando…"}</h1>
+          <h1>
+            {state?.event.name ?? (error ? "Taquilla privada" : "Cargando…")}
+          </h1>
           <p className="sub">
             {state?.event.venue ?? "—"} · $
             {((state?.event.price_cents ?? 0) / 100).toFixed(2)} MXN
@@ -122,7 +124,7 @@ export default function TaquillaPage() {
         <div className="totals">
           <div>
             <strong>{state.totals.paid}</strong>
-            <span className="meta">pagadas</span>
+            <span className="meta">con pago</span>
           </div>
           <div>
             <strong>{state.totals.pending}</strong>
@@ -130,7 +132,7 @@ export default function TaquillaPage() {
           </div>
           <div>
             <strong>{state.totals.late}</strong>
-            <span className="meta">tardías</span>
+            <span className="meta">tarde</span>
           </div>
           <div>
             <strong>{state.totals.admitted}</strong>
@@ -143,9 +145,15 @@ export default function TaquillaPage() {
         </div>
       ) : null}
 
-      {error ? <p className="error">{error}</p> : null}
+      {error ? (
+        <p className="error">
+          {error === "unauthorized"
+            ? "Taquilla privada. Escribe el PIN de staff y guarda."
+            : error}
+        </p>
+      ) : null}
 
-      <h2>Invitadas</h2>
+      <h2>Personas</h2>
       <div className="list">
         {(state?.guests ?? []).map((guest) => (
           <div className="guest-row" key={guest.id}>
