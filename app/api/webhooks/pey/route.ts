@@ -23,6 +23,10 @@ export async function POST(req: Request) {
 
   const raw = await req.text();
   const headers = Object.fromEntries(req.headers) as Record<string, string>;
+  const webhookId = req.headers.get("webhook-id");
+  if (!webhookId) {
+    return Response.json({ error: "webhook-id required" }, { status: 400 });
+  }
 
   try {
     new Webhook(secret).verify(raw, headers);
@@ -31,10 +35,6 @@ export async function POST(req: Request) {
   }
 
   const payload = JSON.parse(raw) as PeyWebhook;
-  const webhookId = req.headers.get("webhook-id");
-  if (!webhookId) {
-    return Response.json({ error: "webhook-id required" }, { status: 400 });
-  }
   const transactionId = payload.transactionId ?? null;
 
   const { error: insertError } = await db().from("webhook_events").insert({
