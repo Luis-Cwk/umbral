@@ -10,8 +10,8 @@ export type OrbSceneProps = {
 };
 
 function particleCount(): number {
-  if (typeof window === "undefined") return 2000;
-  return window.matchMedia("(max-width: 720px)").matches ? 800 : 3200;
+  if (typeof window === "undefined") return 1200;
+  return window.matchMedia("(max-width: 720px)").matches ? 600 : 1600;
 }
 
 function phaseIntensity(phase: OrbSceneProps["phase"]): number {
@@ -21,6 +21,10 @@ function phaseIntensity(phase: OrbSceneProps["phase"]): number {
   return 0.22;
 }
 
+/**
+ * WebGPU point primitives are fixed at 1px — sizeNode is ignored on Points.
+ * SpriteNodeMaterial + InstancedMesh is the supported path for visible particles.
+ */
 export default function OrbScene({
   phase = "closed",
   pulseKey = 0,
@@ -61,7 +65,7 @@ export default function OrbScene({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let material: any = null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let points: any = null;
+    let mesh: any = null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let camera: any = null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,6 +74,8 @@ export default function OrbScene({
     let intensityUniform: any = null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let pulseUniform: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let group: any = null;
 
     const onMove = (event: MouseEvent) => {
       const w = window.innerWidth || 1;
@@ -95,7 +101,7 @@ export default function OrbScene({
     };
 
     const tick = (time: number) => {
-      if (!renderer || !points || !intensityUniform || !pulseUniform) return;
+      if (!renderer || !group || !intensityUniform || !pulseUniform) return;
 
       intensityUniform.value +=
         (phaseIntensity(phaseRef.current) - intensityUniform.value) * 0.06;
@@ -108,12 +114,12 @@ export default function OrbScene({
       mouseX += (targetX - mouseX) * 0.04;
       mouseY += (targetY - mouseY) * 0.04;
 
-      points.rotation.y = time * 0.00008 + mouseX * 0.18;
-      points.rotation.x = mouseY * -0.12;
-      points.scale.setScalar(
+      group.rotation.y = time * 0.00012 + mouseX * 0.2;
+      group.rotation.x = mouseY * -0.14;
+      group.scale.setScalar(
         1 +
-          (phaseRef.current === "paid" ? 0.12 : 0) +
-          pulseUniform.value * 0.2,
+          (phaseRef.current === "paid" ? 0.14 : 0) +
+          pulseUniform.value * 0.22,
       );
 
       renderer.render(scene, camera);
@@ -131,71 +137,94 @@ export default function OrbScene({
         const v = Math.random();
         const theta = 2 * Math.PI * u;
         const phi = Math.acos(2 * v - 1);
-        const r = Math.cbrt(Math.random()) * (compact ? 1.05 : 1.35);
+        const r = Math.cbrt(Math.random()) * (compact ? 1.05 : 1.4);
         const i3 = i * 3;
         positions[i3] = r * Math.sin(phi) * Math.cos(theta);
         positions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
         positions[i3 + 2] = r * Math.cos(phi);
       }
 
-      geometry = new THREE.BufferGeometry();
-      geometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(positions, 3),
+      const positionAttribute = new THREE.InstancedBufferAttribute(
+        positions,
+        3,
       );
 
       intensityUniform = tsl.uniform(phaseIntensity(phaseRef.current));
       pulseUniform = tsl.uniform(0);
 
-      material = new THREE.PointsNodeMaterial({
+      const quad = compact ? 0.045 : 0.055;
+      geometry = new THREE.PlaneGeometry(quad, quad);
+
+      material = new THREE.SpriteNodeMaterial({
         transparent: true,
         depthWrite: false,
-        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending,
       });
 
-      material.sizeNode = tsl
-        .float(compact ? 3.2 : 4.8)
-        .mul(tsl.float(1).add(pulseUniform.mul(1.8)))
-        .mul(tsl.float(0.85).add(intensityUniform.mul(0.6)));
+      const basePos = tsl.instancedBufferAttribute(positionAttribute);
+
+      material.positionNode = tsl.Fn(() => {
+        // TSL node typings omit swizzle helpers on InstancedBufferAttribute nodes
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const p: any = basePos;
+        const t = tsl.time.mul(0.2);
+        const wobble = tsl.vec3(
+          tsl.sin(p.y.mul(1.6).add(t)).mul(0.04),
+          tsl.cos(p.x.mul(1.6).add(t)).mul(0.04),
+          tsl.sin(p.x.add(p.y).add(t)).mul(0.04),
+        );
+        return p.add(wobble).mul(tsl.float(1).add(pulseUniform.mul(0.25)));
+      })();
+
+      material.scaleNode = tsl
+        .vec2(compact ? 1.1 : 1.35)
+        .mul(tsl.float(1).add(pulseUniform.mul(1.4)))
+        .mul(tsl.float(0.85).add(intensityUniform.mul(0.55)));
 
       material.colorNode = tsl.Fn(() => {
-        const base = tsl.color("#f0f0f0");
+        const base = tsl.color("#e8e8e8");
         const accent = tsl.color("#c6ff4a");
         const mixAmount = pulseUniform
-          .mul(0.9)
-          .add(intensityUniform.mul(0.45))
-          .add(0.15)
+          .mul(0.85)
+          .add(intensityUniform.mul(0.4))
+          .add(0.2)
           .clamp(0, 1);
         return tsl.mix(base, accent, mixAmount);
       })();
 
-      material.opacityNode = tsl
-        .float(0.55)
-        .add(intensityUniform.mul(0.4))
-        .add(pulseUniform.mul(0.35))
-        .clamp(0.4, 1);
-
-      material.positionNode = tsl.Fn(() => {
-        const p = tsl.attribute("position", "vec3");
-        const t = tsl.time.mul(0.18);
-        const wobble = tsl.vec3(
-          tsl.sin(p.y.mul(1.7).add(t)).mul(0.035),
-          tsl.cos(p.x.mul(1.7).add(t)).mul(0.035),
-          tsl.sin(p.x.add(p.y).add(t)).mul(0.035),
-        );
-        return p
-          .add(wobble)
-          .mul(tsl.float(1).add(pulseUniform.mul(0.28)));
+      material.opacityNode = tsl.Fn(() => {
+        const soft = tsl
+          .float(1)
+          .sub(tsl.uv().sub(0.5).length().mul(2).clamp(0, 1));
+        return soft
+          .mul(soft)
+          .mul(
+            tsl
+              .float(0.45)
+              .add(intensityUniform.mul(0.4))
+              .add(pulseUniform.mul(0.35)),
+          )
+          .clamp(0.15, 0.95);
       })();
 
-      points = new THREE.Points(geometry, material);
-      points.frustumCulled = false;
+      mesh = new THREE.InstancedMesh(geometry, material, count);
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      mesh.frustumCulled = false;
+      // identity instance matrices — position comes from positionNode
+      const identity = new THREE.Matrix4();
+      for (let i = 0; i < count; i += 1) {
+        mesh.setMatrixAt(i, identity);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+
+      group = new THREE.Group();
+      group.add(mesh);
 
       scene = new THREE.Scene();
-      scene.add(points);
+      scene.add(group);
 
       camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
-      camera.position.z = compact ? 3.4 : 4.1;
+      camera.position.z = compact ? 3.2 : 3.9;
 
       const makeRenderer = (forceWebGL: boolean) =>
         new THREE.WebGPURenderer({
