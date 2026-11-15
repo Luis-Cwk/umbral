@@ -120,13 +120,13 @@ npm run deploy:vinext
 Rutas de prueba:
 
 ```text
-https://umbral.petrasynthetic.workers.dev/
-https://umbral.petrasynthetic.workers.dev/taquilla/00000000-0000-0000-0000-000000000001
-https://umbral.petrasynthetic.workers.dev/puerta/00000000-0000-0000-0000-000000000001?token=demo-token
-https://umbral.petrasynthetic.workers.dev/demo
+https://umbral.petrasynthetic.workers.dev/          ← landing (botones al evento real)
+https://umbral.petrasynthetic.workers.dev/demo      ← simulador
 ```
 
-La taquilla pide PIN de staff. Sin PIN devuelve 401 y el campo queda en `pulseKey` 0: es esperado.
+La landing apunta al evento real. El seed demo (`0000…0001`) sigue en `/taquilla/…` y `/puerta/…` para pruebas sin banco.
+
+La taquilla pide PIN de staff. Sin PIN: "Taquilla privada". El campo ASCII reacciona al texto en landing, puerta, taquilla y demo (`data-field-obstacle` + variables CSS).
 
 ## Qué no tocar
 

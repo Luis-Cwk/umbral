@@ -2,42 +2,44 @@
 
 Definition of done para el Cursor Hackatón CDMX. Si algo no pasa esta lista, no está listo para el video.
 
+Actualizado: 15 de noviembre de 2026 (pre-video).
+
 ## P0, sin esto no hay entrega
 
-- [ ] El repo es público y no tiene `.env.local`, llaves, CLABEs ni secretos.
-- [ ] `npm run build` pasa sin errores.
-- [ ] La app está desplegada (Cloudflare Workers) y abre desde otro celular.
-- [ ] `GET /api/health` responde `{ ok: true }`.
-- [ ] Se puede crear un evento con 8 a 12 invitados.
-- [ ] Se puede emitir un cobro CoDi para un invitado.
-- [ ] El QR se muestra en pantalla y se puede escanear con una app bancaria real.
-- [ ] Un pago real de $0.01 MXN actualiza al invitado a `paid`.
-- [ ] El webhook verifica la firma; una firma inválida devuelve 401.
-- [ ] Un webhook duplicado devuelve 200 y no cambia el estado.
-- [ ] La pantalla de la puerta cambia a `PAGADO: [nombre]` y abre.
-- [ ] La puerta no abre desde `charge_issued`, `expired` o `invited`.
-- [ ] La taquilla muestra el estado en menos de 3 segundos desde el pago.
-- [ ] El corte muestra pagados, pendientes, tardíos y total.
+- [x] El repo es público y no tiene `.env.local`, llaves, CLABEs ni secretos.
+- [x] `npm run build` pasa sin errores.
+- [x] La app está desplegada (Cloudflare Workers) y abre desde otro celular.
+- [x] `GET /api/health` responde `{ ok: true }`.
+- [x] Se puede crear un evento con 8 a 12 invitados.
+- [x] Se puede emitir un cobro CoDi para un invitado.
+- [x] El QR se muestra en pantalla y se puede escanear con una app bancaria real.
+- [x] Un pago real de $0.01 MXN actualiza al invitado a `paid`.
+- [x] El webhook verifica la firma; una firma inválida devuelve 401.
+- [x] Un webhook duplicado devuelve 200 y no cambia el estado.
+- [x] La pantalla de la puerta cambia a `PAGADO: [nombre]` y abre.
+- [x] La puerta no abre desde `charge_issued`, `expired` o `invited`.
+- [x] La taquilla muestra el estado en menos de 3 segundos desde el pago.
+- [x] El corte muestra pagados, pendientes, tardíos y total.
 - [ ] El video de 90 segundos muestra un pago real de principio a fin.
 - [ ] El formulario de entrega está lleno antes de las 12:30 PM del domingo.
 
 ## P1, suma puntos
 
-- [ ] Un QR vencido se puede renovar sin crear un cobro duplicado.
-- [ ] Un pago tardío queda en `late` y pide decisión del staff.
-- [ ] El botón "Reconciliar" consulta la transacción y actualiza si ya está `PAID`.
-- [ ] El modo demo funciona sin pagos reales y está marcado como demo.
-- [ ] La pantalla de la puerta reproduce un tono al abrir.
-- [ ] El README explica el flujo, las variables y cómo probar.
-- [ ] Hay un diagrama de estados en el README o en `docs/`.
-- [ ] El repo tiene un commit por hito, no un solo commit gigante.
+- [x] Un QR vencido se puede renovar sin crear un cobro duplicado.
+- [x] Un pago tardío queda en `late` y pide decisión del staff.
+- [x] El botón "Reconciliar" consulta la transacción y actualiza si ya está `PAID`.
+- [x] El modo demo funciona sin pagos reales y está marcado como demo.
+- [x] La pantalla de la puerta reproduce un tono al abrir.
+- [x] El README explica el flujo, las variables y cómo probar.
+- [x] Hay un diagrama de estados en el README o en `docs/`.
+- [x] El repo tiene un commit por hito, no un solo commit gigante.
 
 ## P2, si sobra tiempo
 
 - [ ] El corte se puede compartir como imagen.
 - [ ] El staff puede admitir manualmente un `late` con una nota.
-- [ ] La taquilla muestra el tiempo restante del QR.
-- [ ] El evento demo tiene 5 invitados y un botón de reset.
+- [x] La taquilla muestra el tiempo restante del QR.
+- [x] El evento demo tiene 5 invitados y un botón de reset.
 - [ ] Hay una página de impacto con el antes/después.
 - [ ] El video tiene subtítulos en español.
 
@@ -94,10 +96,10 @@ Pagar después de que venció el QR. La taquilla debe mostrar `late`, no abrir l
 
 ## Antes de enviar
 
-- [ ] `git status` limpio y sin `.env.local`.
-- [ ] `npm run build` pasa.
-- [ ] La app en vivo abre en incógnito.
+- [x] `git status` limpio y sin `.env.local`.
+- [x] `npm run build` pasa.
+- [x] La app en vivo abre en incógnito.
 - [ ] El video se reproduce sin login.
-- [ ] El repo es público.
+- [x] El repo es público.
 - [ ] El formulario tiene el link del repo, el link de la app y el video.
 - [ ] Los correos del equipo están escritos.

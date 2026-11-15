@@ -118,15 +118,16 @@ Para un cobro **real**, crea un evento con `POST /api/events` (`is_demo` queda `
 
 - Repo público: https://github.com/Luis-Cwk/umbral
 - App en vivo: https://umbral.petrasynthetic.workers.dev
-- Video de ~90 segundos (pago CoDi real de $0.01 + puerta)
-- Formulario del hackatón antes de las 12:30 PM del domingo 15
+- Video de ~90 segundos (pago CoDi real de $0.01 + puerta): guion en `docs/demo-script.md`
+- Formulario del hackatón **antes de las 12:30 PM** del domingo 15 (cierre 13:00)
 
 ## Documentos
 
 - `SPEC.md`: especificación completa.
-- `ACCEPTANCE.md`: definition of done.
+- `ACCEPTANCE.md`: definition of done (casi todo P0/P1 marcado; faltan video y form).
 - `docs/pey-api-notes.md`: notas de la API.
-- `docs/demo-script.md`: guion del video.
+- `docs/demo-script.md`: guion del video + links para el formulario.
+- `docs/DISENO-UI.md`: capa visual (campo ASCII).
 
 ## Licencia
 
