@@ -154,25 +154,26 @@ export default function OrbScene({
       });
 
       material.sizeNode = tsl
-        .float(compact ? 1.6 : 2.2)
+        .float(compact ? 3.2 : 4.8)
         .mul(tsl.float(1).add(pulseUniform.mul(1.8)))
-        .mul(tsl.float(0.75).add(intensityUniform.mul(0.55)));
+        .mul(tsl.float(0.85).add(intensityUniform.mul(0.6)));
 
       material.colorNode = tsl.Fn(() => {
-        const base = tsl.color("#d8d8d8");
-        const accent = tsl.color("#b8ff3d");
+        const base = tsl.color("#f0f0f0");
+        const accent = tsl.color("#c6ff4a");
         const mixAmount = pulseUniform
           .mul(0.9)
-          .add(intensityUniform.mul(0.35))
+          .add(intensityUniform.mul(0.45))
+          .add(0.15)
           .clamp(0, 1);
         return tsl.mix(base, accent, mixAmount);
       })();
 
       material.opacityNode = tsl
-        .float(0.35)
-        .add(intensityUniform.mul(0.45))
+        .float(0.55)
+        .add(intensityUniform.mul(0.4))
         .add(pulseUniform.mul(0.35))
-        .clamp(0.2, 0.95);
+        .clamp(0.4, 1);
 
       material.positionNode = tsl.Fn(() => {
         const p = tsl.attribute("position", "vec3");
