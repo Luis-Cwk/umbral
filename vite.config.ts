@@ -12,4 +12,10 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    include: ["three", "three/webgpu", "three/tsl"],
+  },
+  ssr: {
+    noExternal: ["three"],
+  },
 });

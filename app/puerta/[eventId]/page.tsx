@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Orb } from "@/components/Orb";
 import { resolveEventId } from "@/lib/demo";
 import type { EventState, GuestWithCharge } from "@/lib/types";
 
@@ -38,6 +39,7 @@ function PuertaInner() {
   const [phase, setPhase] = useState<"closed" | "paid" | "inside" | "review">(
     "closed",
   );
+  const [pulseKey, setPulseKey] = useState(0);
   const seen = useRef<Set<string>>(new Set());
   const queue = useRef<GuestWithCharge[]>([]);
 
@@ -74,6 +76,7 @@ function PuertaInner() {
     const guest = queue.current.shift()!;
     setCurrent(guest);
     setPhase("paid");
+    setPulseKey((n) => n + 1);
     playOpenTone();
 
     const admitTimer = setTimeout(() => {
@@ -108,6 +111,7 @@ function PuertaInner() {
 
   return (
     <div className="door">
+      <Orb mode="door" phase={phase} pulseKey={pulseKey} />
       <div className="door-frame">
         <p className="kicker">
           Umbral{state?.event.is_demo ? " · demo" : ""}
