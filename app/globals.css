@@ -1011,7 +1011,7 @@ button:focus-visible,
 
 .landing-hero h1 {
   max-width: 13ch;
-  margin: 0.4rem 0 1.75rem;
+  margin: 0.5rem 0 2.25rem;
   font-size: clamp(2.2rem, 4.4vw, 4rem);
 }
 
@@ -1053,7 +1053,7 @@ button:focus-visible,
 }
 
 .info {
-  margin-top: 1.5rem;
+  margin-top: 2.25rem;
 }
 
 .info summary {
