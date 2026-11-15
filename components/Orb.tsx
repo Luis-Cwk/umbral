@@ -1,29 +1,26 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { OrbFallback } from "./OrbFallback";
-import type { OrbSceneProps } from "./OrbScene";
+import {
+  TypographicField,
+  type TypographicFieldProps,
+} from "./TypographicField";
 
-const OrbScene = dynamic(() => import("./OrbScene"), {
-  ssr: false,
-  loading: () => <OrbFallback />,
-});
-
-export type OrbProps = OrbSceneProps & {
-  mode?: "landing" | "door" | "header";
+export type OrbProps = Omit<TypographicFieldProps, "animate"> & {
   className?: string;
 };
 
-function shouldDisableOrb(): boolean {
+function isDisabled(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("orb") === "0";
+}
+
+function shouldAnimate(): boolean {
   if (typeof window === "undefined") return true;
   const params = new URLSearchParams(window.location.search);
-  if (params.get("orb") === "0") return true;
-  if (params.get("orb") === "1") return false;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return true;
-  }
-  return false;
+  if (params.get("orb") === "1") return true;
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 export function Orb({
@@ -32,16 +29,18 @@ export function Orb({
   pulseKey = 0,
   className,
 }: OrbProps) {
-  const [ready, setReady] = useState(false);
-  const [disabled, setDisabled] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const [enabled, setEnabled] = useState(false);
+  const [animate, setAnimate] = useState(true);
 
   useEffect(() => {
-    setDisabled(shouldDisableOrb());
-    setReady(true);
+    if (isDisabled()) {
+      setEnabled(false);
+      return;
+    }
+    setEnabled(true);
+    setAnimate(shouldAnimate());
   }, []);
 
-  const compact = mode === "header";
   const layerClass = [
     "orb-layer",
     mode === "landing" ? "orb-layer--landing" : "",
@@ -52,7 +51,7 @@ export function Orb({
     .filter(Boolean)
     .join(" ");
 
-  if (!ready || disabled || failed) {
+  if (!enabled) {
     return (
       <div className={layerClass} aria-hidden>
         <OrbFallback bright={phase === "paid"} />
@@ -62,11 +61,11 @@ export function Orb({
 
   return (
     <div className={layerClass} aria-hidden>
-      <OrbScene
+      <TypographicField
+        mode={mode}
         phase={phase}
         pulseKey={pulseKey}
-        compact={compact}
-        onError={() => setFailed(true)}
+        animate={animate}
       />
     </div>
   );

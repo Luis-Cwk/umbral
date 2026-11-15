@@ -357,13 +357,28 @@ h2 {
   position: absolute;
   inset: -2rem -1rem auto;
   height: min(78vh, 720px);
-  opacity: 0.85;
+  opacity: 0.72;
+}
+
+.orb-layer--landing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--bg) 0%,
+    var(--bg) 34%,
+    rgba(5, 5, 5, 0.92) 50%,
+    rgba(5, 5, 5, 0.35) 68%,
+    transparent 82%
+  );
+  pointer-events: none;
 }
 
 .orb-layer--door {
   position: absolute;
   inset: 0;
-  opacity: 0.9;
+  opacity: 0.5;
 }
 
 .orb-layer--header {
@@ -376,9 +391,15 @@ h2 {
 }
 
 .orb-canvas-host,
-.orb-fallback {
+.orb-fallback,
+.ascii-canvas {
   width: 100%;
   height: 100%;
+}
+
+.ascii-canvas {
+  display: block;
+  pointer-events: none;
 }
 
 .orb-fallback {
