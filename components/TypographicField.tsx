@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 export type TypographicFieldProps = {
-  mode?: "landing" | "door" | "header";
+  mode?: "landing" | "door" | "header" | "panel";
   phase?: "closed" | "paid" | "inside" | "review";
   pulseKey?: number | string;
   animate?: boolean;
@@ -16,6 +16,7 @@ const MODES = {
   landing: { cell: 12, cx: 0.68, cy: 0.4, radius: 0.5 },
   door: { cell: 14, cx: 0.5, cy: 0.5, radius: 0.55 },
   header: { cell: 6, cx: 0.5, cy: 0.5, radius: 0.7 },
+  panel: { cell: 11, cx: 0.5, cy: 0.5, radius: 0.58 },
 } as const;
 
 function colorFor(
@@ -90,20 +91,20 @@ export function TypographicField({
 
       const blobs = [
         {
-          x: cfg.cx + Math.sin(t * 0.22) * 0.14,
-          y: cfg.cy + Math.cos(t * 0.17) * 0.12,
+          x: cfg.cx + Math.sin(t * 0.55) * 0.14,
+          y: cfg.cy + Math.cos(t * 0.42) * 0.12,
           r: 0.22,
           k: 1,
         },
         {
-          x: cfg.cx + Math.cos(t * 0.13 + 1.7) * 0.2,
-          y: cfg.cy + Math.sin(t * 0.19 + 0.6) * 0.16,
+          x: cfg.cx + Math.cos(t * 0.33 + 1.7) * 0.2,
+          y: cfg.cy + Math.sin(t * 0.48 + 0.6) * 0.16,
           r: 0.16,
           k: 0.7,
         },
         {
-          x: cfg.cx + Math.sin(t * 0.31 + 3.1) * 0.1,
-          y: cfg.cy + Math.cos(t * 0.27 + 2.2) * 0.18,
+          x: cfg.cx + Math.sin(t * 0.72 + 3.1) * 0.1,
+          y: cfg.cy + Math.cos(t * 0.61 + 2.2) * 0.18,
           r: 0.11,
           k: 0.5,
         },

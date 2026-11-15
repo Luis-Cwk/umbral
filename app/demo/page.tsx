@@ -212,7 +212,7 @@ export default function DemoPage() {
           ) : null}
         </div>
 
-        <div className="qr-stage">
+        <div className={guest?.charge ? "qr-stage" : "qr-stage is-empty"}>
           {guest?.charge ? (
             <QrImage
               qrImage={guest.charge.qr_image}
@@ -220,7 +220,7 @@ export default function DemoPage() {
               alt={`QR demo de ${guest.name}`}
             />
           ) : (
-            <p className="meta">Sin cobro</p>
+            <p className="meta">Emite un cobro para ver el QR.</p>
           )}
         </div>
       </div>

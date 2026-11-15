@@ -8,6 +8,7 @@ import {
 } from "./TypographicField";
 
 export type OrbProps = Omit<TypographicFieldProps, "animate"> & {
+  animate?: boolean;
   className?: string;
 };
 
@@ -16,7 +17,7 @@ function isDisabled(): boolean {
   return new URLSearchParams(window.location.search).get("orb") === "0";
 }
 
-function shouldAnimate(): boolean {
+function autoShouldAnimate(): boolean {
   if (typeof window === "undefined") return true;
   const params = new URLSearchParams(window.location.search);
   if (params.get("orb") === "1") return true;
@@ -27,10 +28,11 @@ export function Orb({
   mode = "landing",
   phase = "closed",
   pulseKey = 0,
+  animate,
   className,
 }: OrbProps) {
   const [enabled, setEnabled] = useState(false);
-  const [animate, setAnimate] = useState(true);
+  const [autoAnimate, setAutoAnimate] = useState(true);
 
   useEffect(() => {
     if (isDisabled()) {
@@ -38,7 +40,7 @@ export function Orb({
       return;
     }
     setEnabled(true);
-    setAnimate(shouldAnimate());
+    setAutoAnimate(autoShouldAnimate());
   }, []);
 
   const layerClass = [
@@ -46,6 +48,7 @@ export function Orb({
     mode === "landing" ? "orb-layer--landing" : "",
     mode === "door" ? "orb-layer--door" : "",
     mode === "header" ? "orb-layer--header" : "",
+    mode === "panel" ? "orb-layer--panel" : "",
     className ?? "",
   ]
     .filter(Boolean)
@@ -65,7 +68,7 @@ export function Orb({
         mode={mode}
         phase={phase}
         pulseKey={pulseKey}
-        animate={animate}
+        animate={animate ?? autoAnimate}
       />
     </div>
   );
