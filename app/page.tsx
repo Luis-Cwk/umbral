@@ -13,9 +13,7 @@ export default function Home() {
             <p className="kicker">Umbral / Hackatón México 2026</p>
             <h1>La puerta que solo abre cuando el dinero ya cayó.</h1>
             <p className="lede">
-              Taquilla con cobros CoDi. Cada persona recibe un QR nuevo. La
-              puerta se abre con el webhook firmado, no con una captura de
-              pantalla.
+              Taquilla con cobros CoDi. La puerta abre con el webhook firmado.
             </p>
             <div className="actions">
               <Link className="btn" href="/demo">
@@ -34,30 +32,32 @@ export default function Home() {
                 Puerta
               </Link>
             </div>
+
+            <details className="info">
+              <summary>Cómo funciona</summary>
+              <div className="info-body">
+                <div className="grid">
+                  <div className="card">
+                    <p className="kicker">01 / Cobro</p>
+                    <p>Un QR nuevo por persona.</p>
+                  </div>
+                  <div className="card">
+                    <p className="kicker">02 / Pago</p>
+                    <p>SPEI instantáneo, sin comisión.</p>
+                  </div>
+                  <div className="card">
+                    <p className="kicker">03 / Puerta</p>
+                    <p>Abre con el webhook firmado.</p>
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
 
           <blockquote className="landing-quote">
             <p>“El pago no es un botón. Es un umbral.”</p>
             <footer>Umbral / CDMX 2026</footer>
           </blockquote>
-
-          <div className="how">
-            <h2>Cómo funciona</h2>
-            <div className="grid">
-              <div className="card">
-                <p className="kicker">01 / Cobro</p>
-                <p>Un QR nuevo por persona.</p>
-              </div>
-              <div className="card">
-                <p className="kicker">02 / Pago</p>
-                <p>SPEI instantáneo, sin comisión.</p>
-              </div>
-              <div className="card">
-                <p className="kicker">03 / Puerta</p>
-                <p>Abre con el webhook firmado.</p>
-              </div>
-            </div>
-          </div>
         </section>
 
         <FieldPanel />

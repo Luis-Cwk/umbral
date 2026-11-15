@@ -627,6 +627,7 @@ button:focus-visible,
   padding: clamp(1.25rem, 2.5vw, 2.5rem);
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  grid-template-rows: 1fr;
   gap: clamp(1.5rem, 3vw, 3rem);
   align-items: stretch;
 }
@@ -637,13 +638,74 @@ button:focus-visible,
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
 .landing-hero h1 {
   max-width: 13ch;
   text-wrap: balance;
+}
+
+.info {
+  margin-top: 1rem;
+}
+
+.info summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  color: var(--gray);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.info summary::-webkit-details-marker {
+  display: none;
+}
+
+.info summary::after {
+  content: "+";
+  color: var(--white);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.info[open] summary {
+  color: var(--white);
+  border-color: var(--white);
+}
+
+.info[open] summary::after {
+  content: "−";
+}
+
+.info summary:hover,
+.info summary:focus-visible {
+  color: var(--white);
+  border-color: var(--white);
+}
+
+.info summary:focus-visible {
+  outline: 2px solid var(--ok);
+  outline-offset: 3px;
+}
+
+.info-body {
+  margin-top: 0.9rem;
+}
+
+.info-body .grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .landing-quote {
@@ -692,8 +754,17 @@ button:focus-visible,
   line-height: 1.4;
 }
 
+.field-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  height: 100%;
+}
+
 .field-panel {
   position: relative;
+  flex: 1;
   min-height: 480px;
   border: 1px solid var(--line);
   border-radius: 1rem;
@@ -725,6 +796,18 @@ button:focus-visible,
 
 .field-panel__foot {
   bottom: 0;
+}
+
+.field-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.15rem;
+  color: var(--gray);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .field-toggle {
@@ -762,33 +845,30 @@ button:focus-visible,
 @media (max-width: 900px) {
   .landing {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
     min-height: auto;
     gap: 1.25rem;
     padding: 1.25rem;
   }
 
   .landing-copy {
-    display: contents;
-  }
-
-  .landing-hero {
+    display: block;
     order: 1;
   }
 
   .landing-quote {
-    order: 2;
     max-width: none;
   }
 
-  .field-panel {
-    order: 3;
-    min-height: 320px;
-    height: 320px;
+  .field-column {
+    order: 2;
+    height: auto;
   }
 
-  .how {
-    order: 4;
-    margin-top: 0;
+  .field-panel {
+    flex: none;
+    min-height: 320px;
+    height: 320px;
   }
 
   .landing-hero h1 {
@@ -796,7 +876,7 @@ button:focus-visible,
     font-size: clamp(2.2rem, 9vw, 3.4rem);
   }
 
-  .how .grid {
+  .info-body .grid {
     grid-template-columns: 1fr;
   }
 
